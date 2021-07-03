@@ -1,12 +1,12 @@
 #! /usr/bin/env bash
 
 # WARNING: Please make this shell not working-directory dependant, for example
-# instead of using 'cd blabla', use 'cd "${REPO_DIR}/blabla"'
-#
-# WARNING: Please don't use sudo directly here since it steals our EXIT trap
+# instead of using 'ls blabla', use 'ls "${REPO_DIR}/blabla"'
 #
 # WARNING: Don't use "cd" in this shell, use it in a subshell instead,
 # for example ( cd blabla && do_blabla ) or $( cd .. && do_blabla )
+#
+# SUGGESTION: Please don't put any dependency installation here
 
 ###############################################################################
 #                             VARIABLES & HELP                                #
@@ -18,7 +18,6 @@ source "${REPO_DIR}/lib-install.sh"
 # Customization, default values
 colors=("${COLOR_VARIANTS[@]}")
 opacities=("${OPACITY_VARIANTS[@]}")
-background="blank"
 
 usage() {
   # Please specify their default value manually, some of them are come from _variables.scss
@@ -33,13 +32,17 @@ usage() {
   helpify "-p, --panel"          "[$(IFS='|'; echo "${PANEL_OPACITY_VARIANTS[*]}")]"  "Set panel transparency"                           "Default is 15%"
   helpify "-s, --size"           "[$(IFS='|'; echo "${SIDEBAR_SIZE_VARIANTS[*]}")]"   "Set Nautilus sidebar minimum width"               "Default is 200px"
   helpify "-i, --icon"           "[$(IFS='|'; echo "${ICON_VARIANTS[*]}")]"           "Set 'Activities' icon"                            "Default is 'standard'"
+  # Not sure if "background" is even needed here
   helpify "-b, --background"     "[default|blank|IMAGE_PATH]"                         "Set gnome-shell background image"                 "Default is BigSur-like wallpaper"
-  helpify "-N, --nautilus-style" "[$(IFS='|'; echo "${NAUTILUS_STYLE_VARIANTS[*]}")]" "Set Nautilus style"                               "Default is BigSur-like style"
+  helpify "-N, --nautilus-style" "[$(IFS='|'; echo "${NAUTILUS_STYLE_VARIANTS[*]}")]" "Set Nautilus style"                               "Default is BigSur-like style (stabled sidebar)"
+  helpify "-HD, --highdefinition"         ""                                          "Set to High Definition size"                      "Default is laptop size"
+  helpify "--normal, --normalshowapps"    ""                                          "Set gnome-shell show apps button style to normal" "Default is bigsur"
   helpify "--round, --roundedmaxwindow"   ""                                          "Set maximized window to rounded"                  "Default is square"
   helpify "--right, --rightplacement"     ""                                          "Set Nautilus titlebutton placement style to right" "Default is left"
   helpify "--normal, --normalshowapps"    ""                                          "Set gnome-shell show apps button style to normal" "Default is bigsur"
   helpify "--dialog, --interactive"       ""                                          "Run this installer interactively, with dialogs"   ""
   helpify "-r, --remove, -u, --uninstall" ""                                          "Remove all installed ${THEME_NAME} themes"        ""
+  helpify "--silent-mode"                 ""                                          "Meant for developers: ignore any confirm prompt and params become more strict" ""
   helpify "-h, --help"                    ""                                          "Show this help"                                   ""
 }
 
@@ -48,6 +51,8 @@ usage() {
 ###############################################################################
 
 #-----------------------------PARSE ARGUMENTS---------------------------------#
+
+echo
 
 while [[ $# -gt 0 ]]; do
   # Don't show any dialog here. Let this loop checks for errors or shows help
@@ -63,16 +68,20 @@ while [[ $# -gt 0 ]]; do
       # Parameters that don't require value
     -r|--remove|-u|-uninstall)
       uninstall='true'; shift ;;
+    --silent-mode)
+      full_sudo "${1}"; silent_mode='true'; shift ;;
     --dialog|--interactive)
       interactive='true'; shift ;;
+    -h|--help)
+      need_help="true"; shift ;;
     --normal|--normalshowapps)
       showapps_normal="true"; shift ;;
     --right|--rightplacement)
       right_placement="true"; shift ;;
     --round|--roundedmaxwindow)
       max_round="true"; shift ;;
-    -h|--help)
-      need_help="true"; shift ;;
+    -HD|--highdefinition)
+      compact="false"; shift ;;
       # Parameters that require value, single use
     -b|--background)
       check_param "${1}" "${1}" "${2}" "must" "must" "must" "false" && shift 2 || shift ;;
@@ -113,12 +122,12 @@ if [[ "${uninstall}" == 'true' ]]; then
   remove_themes
   prompt -s "Done! All '${name}' themes has been removed."
 else
-  install_theme_deps; echo
-
   if [[ "${interactive}" == 'true' ]]; then
     show_panel_opacity_dialog; show_sidebar_size_dialog; show_nautilus_style_dialog
-    prompt -w "DIALOG: '--size' and '--panel' parameters are ignored if exist."; echo
-  else show_needed_dialogs; fi
+    echo; prompt -w "DIALOG: '--size' and '--panel' parameters are ignored if exist."; echo
+  else
+    show_needed_dialogs
+  fi
 
   prompt -w "Removing the old '${name}' themes..."
 
@@ -137,16 +146,23 @@ else
 
   # rm -rf "${THEME_SRC_DIR}/sass/_gtk-base-temp.scss"
 
-  if is_my_distro "arch" && has_command xfce4-session; then
+  if (is_my_distro "arch" || is_my_distro "void") && has_command xfce4-session; then
     msg="XFCE: you may need to logout after changing your theme to fix your panel opacity."
-    notif_msg="${msg}\n\n${final_msg}"
+  elif (is_my_distro "solus") && has_command gnome-shell; then
+    msg="GNOME: you may need to disable 'User Themes' extension to fix your dock."
+  elif (is_my_distro "debian") && [[ "${GNOME_VERSION}" == "old" ]]; then
+    msg="GNOME: you may need to disable 'User Themes' extension to fix your logout and authentication dialog."
+  fi
 
+  if [[ "${msg}" ]]; then
     echo; prompt -w "${msg}"
+    notif_msg="${msg}\n\n${final_msg}"
   else
     notif_msg="${final_msg}"
   fi
 
-  echo; prompt -w "${final_msg}"; echo
-
+  echo; prompt -w "${final_msg}"
   [[ -x /usr/bin/notify-send ]] && notify-send "'${name}' theme has been installed. Enjoy!" "${notif_msg}" -i "dialog-information-symbolic"
 fi
+
+echo
