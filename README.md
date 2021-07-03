@@ -1,10 +1,10 @@
 # Newsur-Gtk-theme
-This is a modifid version og Whites-sur GTK theme.
+This is a modified version of WhiteSur GTK theme.
 
 ## Preview
 ![Homepage preview](Ss/preview.png)
 
-To use this theme you have to use putple them varient
+To use this theme you have to use the purple theme varient
 
 ##README of WhiteSur theme
 <h1 align="center"> WhiteSur GTK Theme </h1>
