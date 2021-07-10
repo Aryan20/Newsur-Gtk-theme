@@ -4,9 +4,7 @@ This is a modified version of WhiteSur GTK theme.
 ## Preview
 ![Homepage preview](Ss/preview.png)
 
-To use this theme you have to use the purple theme varient
-
-##README of WhiteSur theme
+## README of WhiteSur theme
 <h1 align="center"> WhiteSur GTK Theme </h1>
 <p align="center"> <img src="https://github.com/vinceliuice/WhiteSur-gtk-theme/blob/pictures/pictures/macbook.png"/> </p>
 
