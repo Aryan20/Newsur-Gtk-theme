@@ -4,7 +4,7 @@
 #panel {
   background-color: $panel_bg;
   font-weight: normal;
-  height: $menuitem_size;
+  height: $menuitem_size - 4px;
   box-shadow: 0 5px 16px rgba(black, 0.35);
   color: $panel_fg;
   font-feature-settings: "tnum";
@@ -98,7 +98,7 @@
     }
 
     &.clock-display {
-      StLabel { padding: 0 2px; }
+      StLabel { padding: 0 $base_margin; }
 
       .clock {
         // transition-duration: 150ms;
@@ -126,13 +126,17 @@
     // status area icons
     .system-status-icon {
       icon-size: $base_icon_size;
-      padding: $base_padding $base_padding/2;
-      margin: 0 ($base_margin - 2px);
+      padding: $base_padding;
+      margin: 0 $base_padding;
     }
 
     // .panel-status-indicators-box .system-status-icon,
-    .panel-status-menu-box .system-status-icon { margin: 0; }
-    .panel-status-menu-box StLabel { padding: 0 0 0 2px; }
+    .panel-status-menu-box .system-status-icon { margin: 0 0; }
+    .panel-status-menu-box StLabel { padding: 0 0 0 $base_padding / 2; }
+
+    .appindicator-trayicons-box { margin: 0 $base_padding; }
+
+    // .appindicator-box { margin: 0 0; }
 
     // app menu icon
     .app-menu-icon {
@@ -143,6 +147,19 @@
     &#panelActivities {
       -natural-hpadding: $base_padding * 3;
     }
+  }
+
+  Gjs_AggregateMenu.panel-button,
+  Gjs_ui_panel_AggregateMenu.panel-button {
+    .system-status-icon {
+      margin: 0 0 !important;
+    }
+  }
+
+  Gjs_ui_panel_AppMenuButton.panel-button,
+  .menubar-button, // For Fildem global menu
+  .desktop-name-label { // For Unite
+    font-weight: bold !important;
   }
 
   &.unlock-screen,

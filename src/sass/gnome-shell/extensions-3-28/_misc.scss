@@ -62,23 +62,47 @@
   &-build-icon { color: $alt_fg_color; }
 }
 
-// GPaste
-.popup-menu {
-  .search-entry {
-    color: $fg_color;
-    selection-background-color: $primary_color;
-    selected-color: $light_fg_color;
-    @include entry(normal);
+//
+// Gsconnect
+//
+.gsconnect-device-menu {
+  background-color: if($variant == 'light', white, rgba(white, 0.06));
+  border-radius: $bt_radius;
+  margin: $container_padding / 2;
+  padding: $bt_radius 0;
+  box-shadow: 1px 2px 3px rgba(black, if($variant == 'light', 0.08, 0.35));
 
-    &:focus {
-      @include entry(focus);
-      color: $fg_color;
+  .popup-menu-item {
+    height: 16px !important;
+    border-radius: 0 !important;
+
+    &:hover {
+      color: $fg_color !important;
+      background-color: rgba($fg_color, 0.1) !important;
     }
 
-    .search-entry-icon { color: $hint_fg_color; }
-
-    &:hover, &:focus {
-      .search-entry-icon { color: $fg_color; }
+    > :first-child {
+      &:ltr { padding-left: 0 !important; margin-left: 0 !important; }
+      &:rtl { padding-right: 0 !important; margin-right: 0 !important; }
     }
+  }
+}
+
+//
+// Pop_OS cosmic widget styling
+//
+.cosmic-dock {
+  #dock {
+    background-color: $dash_bg;
+    border-radius: $dash_radius;
+    border: 1px solid if($variant == 'light', rgba(black, 0.03), rgba(black, 0.35));
+    box-shadow: inset 0 0 0 1px rgba(white, 0.05);
+    padding: $container_padding;
+    margin: 6px !important;
+  }
+
+  &.extended #dock {
+    border-radius: 0 !important;
+    margin: 0 !important;
   }
 }
