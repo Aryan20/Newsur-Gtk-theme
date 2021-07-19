@@ -84,7 +84,10 @@ XfdesktopIconView.view {
     text-shadow: none;
   }
 
-  .rubberband { @extend %rubberband; }
+  .rubberband {
+    @extend %rubberband;
+    border-radius: 0;
+  }
 }
 
 window#whiskermenu-window {

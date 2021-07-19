@@ -167,12 +167,25 @@ $submenu_bg_color:                  if($variant == 'light', rgba(white, 1), rgba
 
 // Panel colors
 $panel_bg:                          if($variant == 'light', #f1f1f1, #2a2a2a);
-$panel_fg:                          if($trans == 'true', white, $text_color);
 
-@if $trans == 'true' { $panel_bg:   if($variant == 'light', rgba(white, $panel_opacity/2 + 0.08), rgba(black, $panel_opacity)); }
-@if $black == 'true' { $panel_fg:   $text_color; }
+@if $trans == 'true' {
+  $panel_bg:                        if($variant == 'light', rgba(white, $panel_opacity/2 + 0.08), rgba(black, $panel_opacity));
 
-$dash_bg: if($variant == 'light', rgba(#d1d1d1, $panel_opacity + 0.33), rgba(#222222, $panel_opacity/2 + 0.6));
+  @if $panel_font == 'black' {
+    $panel_bg:                      if($variant == 'light', rgba(white, $panel_opacity/2 + 0.08), rgba(black, $panel_opacity/2));
+  }
+}
+
+$panel_fg:                          if($trans == 'true' and $panel_font == 'white', $light_fg_color, $text_color);
+$panel_track:                       if($trans == 'false' or $panel_font == 'black' and $variant == 'light', rgba(black, 0.15), rgba(white, 0.28));
+$panel_divider:                     if($trans == 'false' or $panel_font == 'black' and $variant == 'light', rgba(black, 0.08), rgba(white, 0.15));
+
+$dash_bg:                           if($variant == 'light', rgba(#d1d1d1, $panel_opacity + 0.33), rgba(#222222, $panel_opacity/2 + 0.6));
+
+@if $trans == 'true' and $panel_font == 'black' {
+  $dash_bg:                         if($variant == 'light', rgba(#d1d1d1, $panel_opacity/2 + 0.08), rgba(#222222, $panel_opacity + 0.15));
+}
+
 $dash_fg: if($variant == 'light', black, white);
 
 // Entry colors

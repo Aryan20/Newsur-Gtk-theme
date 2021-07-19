@@ -4,8 +4,8 @@
 #panel {
   background-color: $panel_bg;
   font-weight: normal;
-  height: $menuitem_size - 4px;
-  box-shadow: 0 5px 16px rgba(black, 0.35);
+  height: $menuitem_size - 4px !important;
+  box-shadow: 0 5px 16px rgba(black, 0.05);
   color: $panel_fg;
   font-feature-settings: "tnum";
   transition-duration: 250ms;
@@ -17,6 +17,7 @@
   &.login-screen,
   &.lock-screen {
     background-color: if($trans == 'false' and $variant == 'light', transparent, transparent);
+    box-shadow: none;
 
     StLabel, StIcon { color: $light_alt_fg_color; }
 
@@ -79,12 +80,12 @@
 
     &:hover {
       color: $panel_fg;
-      background-color: if($trans == 'false' and $variant == 'light', $divider_color, $light_divider_color);
+      background-color: $panel_divider;
     }
 
     &:active, &:overview, &:focus, &:checked {
       &, &:hover {
-        background-color: if($trans == 'false' and $variant == 'light', $track_color, $light_track_color);
+        background-color: $panel_track;
         color: $panel_fg;
         box-shadow: none;
       }
@@ -216,9 +217,11 @@
     // > * { background-image: url("assets/activities-active.svg"); }
   }
 
-  @if $variant == 'light' and $black == 'true' {
-    &:overview {
-      > * { background-image: url("assets/activities-white.svg"); }
+  @if $variant == 'light' {
+    @if $panel_font == 'black' or $trans == 'false' {
+      &:overview {
+        > * { background-image: url("assets/activities-white.svg"); }
+      }
     }
   }
 }
