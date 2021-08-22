@@ -709,8 +709,12 @@ button {
 
     &:checked:hover { background-image: none; }
 
-    &.toggle.popup {
+    &.toggle.popup:not(.colored) {
       min-width: $menuitem_size - 8px;
+    }
+
+    &.toggle.popup.colored {
+      min-width: $menuitem_size - 4px;
     }
   }
 
@@ -779,7 +783,8 @@ button {
     &.popup { padding-right: $container_padding; padding-left: $container_padding; }
   }
 
-  &.close, &.circular { // The Bloody Circul Button
+  &.close, &.circular,
+  &.image-button.close:not(.circular) { // The Bloody Circul Button
     @extend %circular_button;
 
     &:active, &:checked {
@@ -817,6 +822,14 @@ button {
 
     &:active, &:checked {@include button(osd-active); }
     &:disabled { @include button(osd-insensitive); }
+
+    .linked:not(.vertical) > & {
+      border-radius: 0;
+
+      &:first-child { border-radius: $circular_radius 0 0 $circular_radius; }
+      &:last-child { border-radius: 0 $circular_radius $circular_radius 0; }
+      &:only-child { border-radius: $circular_radius; }
+    }
   }
 
   //overlay / OSD style
@@ -1396,8 +1409,9 @@ actionbar {
     background-color: darken($bg_color, 3%);
   }
 
-  .background.csd revealer > & > revealer > box,
-  .background.csd > box.vertical > & > revealer > box {
+  // .background.csd revealer > & > revealer > box,
+  .background.csd > box.vertical > & > revealer > box,
+  .background.csd > box > box > box > & > revealer > box {
     border-radius: 0 0 $wm_radius $wm_radius;
   }
 }
@@ -2177,7 +2191,7 @@ menu,
   padding: $container_padding;
   border-radius: $mn_radius;
   background-color: opacify($menu_bg, 1);
-  border: 1px solid $solid_borders_color;
+  border: none;
   color: $fg_color;
 
   .csd & {

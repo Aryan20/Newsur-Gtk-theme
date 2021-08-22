@@ -50,6 +50,7 @@ THEME_SRC_DIR="${REPO_DIR}/src"
 DASH_TO_DOCK_SRC_DIR="${REPO_DIR}/src/other/dash-to-dock"
 DASH_TO_DOCK_DIR_ROOT="/usr/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com"
 DASH_TO_DOCK_DIR_HOME="${MY_HOME}/.local/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com"
+GNOME_SHELL_EXTENSION_DIR="${MY_HOME}/.local/share/gnome-shell/extensions"
 FIREFOX_SRC_DIR="${REPO_DIR}/src/other/firefox"
 FIREFOX_DIR_HOME="${MY_HOME}/.mozilla/firefox"
 FIREFOX_THEME_DIR="${MY_HOME}/.mozilla/firefox/firefox-themes"
@@ -86,6 +87,7 @@ THEME_VARIANTS=('default' 'blue' 'purple' 'pink' 'red' 'orange' 'yellow' 'green'
 ICON_VARIANTS=('standard' 'simple' 'gnome' 'ubuntu' 'arch' 'manjaro' 'fedora' 'debian' 'void' 'opensuse' 'popos' 'mxlinux' 'zorin')
 SIDEBAR_SIZE_VARIANTS=('default' '180' '220' '240' '260' '280')
 PANEL_OPACITY_VARIANTS=('default' '30' '45' '60' '75')
+PANEL_SIZE_VARIANTS=('default' 'smaller' 'bigger')
 NAUTILUS_STYLE_VARIANTS=('stable' 'normal' 'mojave' 'glassy')
 
 #--------Customization, default values----------#
@@ -98,13 +100,14 @@ themes=("${THEME_VARIANTS[0]}")
 icon="${ICON_VARIANTS[0]}"
 sidebar_size="${SIDEBAR_SIZE_VARIANTS[0]}"
 panel_opacity="${PANEL_OPACITY_VARIANTS[0]}"
+panel_size="${PANEL_SIZE_VARIANTS[0]}"
 nautilus_style="${NAUTILUS_STYLE_VARIANTS[0]}"
 background="blank"
 compact="true"
 
 #--Ambigous arguments checking and overriding default values--#
-declare -A has_set=([-b]="false" [-s]="false" [-p]="false" [-d]="false" [-n]="false" [-a]="false" [-o]="false" [-c]="false" [-i]="false" [-t]="false" [-N]="false")
-declare -A need_dialog=([-b]="false" [-s]="false" [-p]="false" [-d]="false" [-n]="false" [-a]="false" [-o]="false" [-c]="false" [-i]="false" [-t]="false" [-N]="false")
+declare -A has_set=([-b]="false" [-s]="false" [-p]="false" [-P]="false" [-d]="false" [-n]="false" [-a]="false" [-o]="false" [-c]="false" [-i]="false" [-t]="false" [-N]="false")
+declare -A need_dialog=([-b]="false" [-s]="false" [-p]="false" [-P]="false" [-d]="false" [-n]="false" [-a]="false" [-o]="false" [-c]="false" [-i]="false" [-t]="false" [-N]="false")
 
 #------------Tweaks---------------#
 need_help="false"
@@ -391,15 +394,13 @@ destify() {
 
 parsimplify() {
   case "${1}" in
-    --size)
-      echo "-s" ;;
-    --panel)
-      echo "-p" ;;
     --name|-n)
       # workaround for echo
       echo "~-n" | cut -c 2- ;;
     --dest)
       echo "-d" ;;
+    --size)
+      echo "-s" ;;
     --alt)
       echo "-a" ;;
     --opacity)
@@ -410,6 +411,10 @@ parsimplify() {
       echo "-i" ;;
     --theme)
       echo "-t" ;;
+    --panel-opacity)
+      echo "-p" ;;
+    --panel-size)
+      echo "-P" ;;
     --nautilus-style)
       echo "-N" ;;
     --background)
@@ -519,6 +524,12 @@ check_param() {
             panel_opacity="${value}"; variant_found="true"; break
           fi
         done ;;
+      -P)
+        for i in {0..2}; do
+          if [[ "${value}" == "${PANEL_SIZE_VARIANTS[i]}" ]]; then
+            panel_size="${value}"; variant_found="true"; break
+          fi
+        done ;;
       -a)
         if [[ "${value}" == "all" ]]; then
           for i in {0..2}; do
@@ -546,7 +557,7 @@ check_param() {
           fi
         done ;;
       -i)
-        for i in {0..8}; do
+        for i in {0..12}; do
           if [[ "${value}" == "${ICON_VARIANTS[i]}" ]]; then
             icon="${ICON_VARIANTS[i]}"; variant_found="true"; break
           fi
@@ -605,7 +616,7 @@ avoid_variant_duplicates() {
 ###############################################################################
 
 restore_file() {
-  if [[ -f "${1}.bak" ]]; then
+  if [[ -f "${1}.bak" || -d "${1}.bak" ]]; then
     case "${2}" in
       sudo)
         sudo rm -rf "${1}"; sudo mv "${1}"{".bak",""} ;;
@@ -618,7 +629,7 @@ restore_file() {
 }
 
 backup_file() {
-  if [[ -f "${1}" ]]; then
+  if [[ -f "${1}" || -d "${1}" ]]; then
     case "${2}" in
       sudo)
         sudo mv -n "${1}"{"",".bak"} ;;

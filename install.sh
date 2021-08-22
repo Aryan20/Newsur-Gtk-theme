@@ -29,7 +29,8 @@ usage() {
   helpify "-c, --color"          "[$(IFS='|'; echo "${COLOR_VARIANTS[*]}")]"          "Set theme color variants"                         "Repeatable. Default is all variants"
   helpify "-a, --alt"            "[$(IFS='|'; echo "${ALT_VARIANTS[*]}")|all]"        "Set window control buttons variant"               "Repeatable. Default is 'normal'"
   helpify "-t, --theme"          "[$(IFS='|'; echo "${THEME_VARIANTS[*]}")|all]"      "Set theme accent color"                           "Repeatable. Default is BigSur-like theme"
-  helpify "-p, --panel"          "[$(IFS='|'; echo "${PANEL_OPACITY_VARIANTS[*]}")]"  "Set panel transparency"                           "Default is 15%"
+  helpify "-p, --panel-opacity"  "[$(IFS='|'; echo "${PANEL_OPACITY_VARIANTS[*]}")]"  "Set panel transparency"                           "Default is 15%"
+  helpify "-P, --panel-size"     "[$(IFS='|'; echo "${PANEL_SIZE_VARIANTS[*]}")]"     "Set Gnome shell panel height size"                "Default is 32px"
   helpify "-s, --size"           "[$(IFS='|'; echo "${SIDEBAR_SIZE_VARIANTS[*]}")]"   "Set Nautilus sidebar minimum width"               "Default is 200px"
   helpify "-i, --icon"           "[$(IFS='|'; echo "${ICON_VARIANTS[*]}")]"           "Set 'Activities' icon"                            "Default is 'standard'"
   helpify "-b, --background"     "[default|blank|IMAGE_PATH]"                         "Set gnome-shell background image"                 "Default is BigSur-like wallpaper"
@@ -95,7 +96,9 @@ while [[ $# -gt 0 ]]; do
       check_param "${1}" "${1}" "${2}" "must" "must" "must" && shift 2 || shift ;;
     -s|--size)
       check_param "${1}" "${1}" "${2}" "optional" "optional" "optional" && shift 2 || shift ;;
-    -p|--panel)
+    -p|--panel-opacity)
+      check_param "${1}" "${1}" "${2}" "optional" "optional" "optional" && shift 2 || shift ;;
+    -P|--panel-size)
       check_param "${1}" "${1}" "${2}" "optional" "optional" "optional" && shift 2 || shift ;;
     -N|--nautilus-style)
       check_param "${1}" "${1}" "${2}" "optional" "optional" "optional" && shift 2 || shift ;;
@@ -150,11 +153,11 @@ else
 
   # rm -rf "${THEME_SRC_DIR}/sass/_gtk-base-temp.scss"
 
-  if (is_my_distro "arch" || is_my_distro "void") && has_command xfce4-session; then
-    msg="XFCE: you may need to logout after changing your theme to fix your panel opacity."
-  elif (is_my_distro "solus") && has_command gnome-shell; then
+  if (is_running "xfce4-session"); then
+    msg="XFCE: you may need to run 'xfce4-panel -r' after changing your theme to fix your panel opacity."
+  elif (is_my_distro "solus") && (is_running "gnome-session"); then
     msg="GNOME: you may need to disable 'User Themes' extension to fix your dock."
-  elif (is_my_distro "debian") && [[ "${GNOME_VERSION}" == "old" ]]; then
+  elif (is_running "gnome-session") && [[ "${GNOME_VERSION}" == "old" ]]; then
     msg="GNOME: you may need to disable 'User Themes' extension to fix your logout and authentication dialog."
   fi
 

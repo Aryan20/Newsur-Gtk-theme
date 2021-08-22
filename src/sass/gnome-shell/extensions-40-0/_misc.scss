@@ -1,7 +1,6 @@
 //
 // Dash to panel
 //
-
 #preview-menu {
   margin: 0 6px 6px !important;
   padding-bottom: 8px !important;
@@ -11,7 +10,10 @@
   }
 }
 
-//  OpenWeather Extension
+
+//
+// OpenWeather Extension
+//
 .openweather {
   &-button,
   &-button-action,
@@ -69,7 +71,6 @@
   &-sunset-icon,
   &-build-icon { color: $alt_fg_color; }
 }
-
 
 //
 // Gsconnect
