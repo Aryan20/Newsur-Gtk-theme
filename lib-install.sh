@@ -250,6 +250,39 @@ install_dialog_deps() {
   fi
 }
 
+install_flatpak_deps() {
+  if ! has_command ostree || ! has_command appstream-compose; then
+    prompt -w "DEPS: 'ostree' and 'appstream-util' is required for flatpak installing."
+    prepare_deps; stop_animation
+
+    if has_command zypper; then
+      sudo zypper in -y libostree appstream-glib
+    elif has_command swupd; then
+      # Rolling release
+      prepare_swupd && sudo swupd ostree libappstream-glib
+    elif has_command apt; then
+      prepare_install_apt_packages ostree appstream-util
+    elif has_command dnf; then
+      sudo dnf install -y ostree libappstream-glib
+    elif has_command yum; then
+      sudo yum install -y ostree libappstream-glib
+    elif has_command pacman; then
+      # Rolling release
+      sudo pacman -Syyu --noconfirm --needed ostree appstream-glib
+    elif has_command xbps-install; then
+      # Rolling release
+      # 'libxml2' is already included here, and it's gonna broke the installation
+      # if you add it
+      prepare_xbps && sudo xbps-install -Sy ostree appstream-glib
+    elif has_command eopkg; then
+      # Rolling release
+      sudo eopkg -y upgrade; sudo eopkg -y ostree appstream-glib
+    else
+      installation_sorry
+    fi
+  fi
+}
+
 ###############################################################################
 #                              THEME MODULES                                  #
 ###############################################################################
@@ -552,6 +585,8 @@ install_gdm_theme() {
       TARGET="${POP_OS_GR_FILE}"
     elif check_theme_file "$YARU_GR_FILE"; then
       TARGET="${YARU_GR_FILE}"
+    elif check_theme_file "$ZORIN_GR_FILE"; then
+      TARGET="${ZORIN_GR_FILE}"
     elif check_theme_file "$MISC_GR_FILE"; then
       TARGET="${MISC_GR_FILE}"
     fi
@@ -570,6 +605,7 @@ revert_gdm_theme() {
   restore_file "${ZORIN_CSS_FILE}"; restore_file "${ETC_CSS_FILE}"
   restore_file "${POP_OS_GR_FILE}"; restore_file "${YARU_GR_FILE}"
   restore_file "${MISC_GR_FILE}"; restore_file "${ETC_GR_FILE}"
+  restore_file "${ZORIN_GR_FILE}"
 }
 
 ###############################################################################
@@ -671,20 +707,22 @@ install_dash_to_dock_theme() {
 
   if [[ -d "${DASH_TO_DOCK_DIR_HOME}" ]]; then
     backup_file "${DASH_TO_DOCK_DIR_HOME}/stylesheet.css" "udo"
-    udoify_file                                                                               "${DASH_TO_DOCK_DIR_HOME}/stylesheet.css"
-    udo sassc ${SASSC_OPT} "${DASH_TO_DOCK_SRC_DIR}/stylesheet$(destify ${colors[0]}).scss"   "${DASH_TO_DOCK_DIR_HOME}/stylesheet.css"
+    udoify_file                                                                                "${DASH_TO_DOCK_DIR_HOME}/stylesheet.css"
+    if [[ "${GNOME_VERSION}" == 'new'  ]]; then
+      udo sassc ${SASSC_OPT} "${DASH_TO_DOCK_SRC_DIR}/stylesheet-40.scss"                      "${DASH_TO_DOCK_DIR_HOME}/stylesheet.css"
+    else
+      udo sassc ${SASSC_OPT} "${DASH_TO_DOCK_SRC_DIR}/stylesheet$(destify ${colors[0]}).scss"  "${DASH_TO_DOCK_DIR_HOME}/stylesheet.css"
+    fi
   elif [[ -d "${DASH_TO_DOCK_DIR_ROOT}" ]]; then
     backup_file "${DASH_TO_DOCK_DIR_ROOT}/stylesheet.css" "sudo"
-    sudo sassc ${SASSC_OPT} "${DASH_TO_DOCK_SRC_DIR}/stylesheet$(destify ${colors[0]}).scss"  "${DASH_TO_DOCK_DIR_ROOT}/stylesheet.css"
+    if [[ "${GNOME_VERSION}" == 'new'  ]]; then
+      sudo sassc ${SASSC_OPT} "${DASH_TO_DOCK_SRC_DIR}/stylesheet-40.scss"                     "${DASH_TO_DOCK_DIR_ROOT}/stylesheet.css"
+    else
+      sudo sassc ${SASSC_OPT} "${DASH_TO_DOCK_SRC_DIR}/stylesheet$(destify ${colors[0]}).scss" "${DASH_TO_DOCK_DIR_ROOT}/stylesheet.css"
+    fi
   fi
 
   udo dbus-launch dconf write /org/gnome/shell/extensions/dash-to-dock/apply-custom-theme true
-}
-
-revert_dash_to_dock() {
-  if [[ -d "${DASH_TO_DOCK_DIR_HOME}.bak" ]]; then
-    restore_file "${DASH_TO_DOCK_DIR_HOME}" "udo"
-  fi
 }
 
 revert_dash_to_dock_theme() {
@@ -701,30 +739,14 @@ revert_dash_to_dock_theme() {
 #                              FLATPAK & SNAP                                 #
 ###############################################################################
 
-flatpak_remove() {
-  local color="$(destify ${1})"
-  local opacity="$(destify ${2})"
-  local alt="$(destify ${3})"
-  local theme="$(destify ${4})"
-
-  if [[ -w "/root" ]]; then
-    flatpak remove -y --system org.gtk.Gtk3theme.${THEME_NAME}${color}${opacity}${alt}${theme}
-  else
-    flatpak remove -y --user org.gtk.Gtk3theme.${THEME_NAME}${color}${opacity}${alt}${theme}
-  fi
-}
-
 connect_flatpak() {
-  if [[ -w "/root" ]]; then
-    install_target=system
-  else
-    install_target=user
-  fi
+  install_flatpak_deps
+
   for opacity in "${opacities[@]}"; do
     for alt in "${alts[@]}"; do
       for theme in "${themes[@]}"; do
         for color in "${colors[@]}"; do
-          pakitheme "${color}" "${opacity}" "${alt}" "${theme}"
+          pakitheme_gtk3 "${color}" "${opacity}" "${alt}" "${theme}"
         done
       done
     done
@@ -789,63 +811,68 @@ customize_theme() {
 
   # Change gnome-shell panel transparency
   if [[ "${panel_opacity}" != 'default' ]]; then
-    prompt -s "Changing panel transparency ..."
+    prompt -s "Changing panel transparency ... \n"
     sed $SED_OPT "/\$panel_opacity/s/0.15/0.${panel_opacity}/"                  "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change gnome-shell panel height size
   if [[ "${panel_size}" != 'default' ]]; then
-    prompt -s "Changing panel height size to '${panel_size}'..."
+    prompt -s "Changing panel height size to '${panel_size}'... \n"
     sed $SED_OPT "/\$panel_size/s/default/${panel_size}/"                       "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change gnome-shell show apps button style
   if [[ "${showapps_normal}" == 'true' ]]; then
-    prompt -s "Changing gnome-shell show apps button style ..."
+    prompt -s "Changing gnome-shell show apps button style ... \n"
     sed $SED_OPT "/\$showapps_button/s/bigsur/normal/"                          "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change Nautilus sidarbar size
   if [[ "${sidebar_size}" != 'default' ]]; then
-    prompt -s "Changing Nautilus sidebar size ..."
+    prompt -s "Changing Nautilus sidebar size ... \n"
     sed $SED_OPT "/\$sidebar_size/s/200px/${sidebar_size}px/"                   "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change Nautilus style
   if [[ "${nautilus_style}" != 'stable' ]]; then
-    prompt -s "Changing Nautilus style ..."
+    prompt -s "Changing Nautilus style ... \n"
     sed $SED_OPT "/\$nautilus_style/s/stable/${nautilus_style}/"                "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change Nautilus titlebutton placement style
   if [[ "${right_placement}" == 'true' ]]; then
-    prompt -s "Changing Nautilus titlebutton placement style ..."
+    prompt -s "Changing Nautilus titlebutton placement style ... \n"
     sed $SED_OPT "/\$placement/s/left/right/"                                   "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change maximized window radius
   if [[ "${max_round}" == 'true' ]]; then
-    prompt -s "Changing maximized window style ..."
+    prompt -s "Changing maximized window style ... \n"
     sed $SED_OPT "/\$max_window_style/s/square/round/"                          "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change panel font color
   if [[ "${monterey}" == 'true' ]]; then
     black_font="true"
-    prompt -s "Changing to Monterey style ..."
+    prompt -s "Changing to Monterey style ... \n"
     sed $SED_OPT "/\$monterey/s/false/true/"                                    "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
     sed $SED_OPT "/\$panel_opacity/s/0.15/0.5/"                                 "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   # Change panel font color
   if [[ "${black_font}" == 'true' ]]; then
-    prompt -s "Changing panel font color ..."
+    prompt -s "Changing panel font color ... \n"
     sed $SED_OPT "/\$panel_font/s/white/black/"                                 "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 
   if [[ "${compact}" == 'false' ]]; then
-    prompt -s "Changing Definition mode to HD (Bigger font, Bigger size) ..."
+    prompt -s "Changing Definition mode to HD (Bigger font, Bigger size) ... \n"
     #FIXME: @vince is it not implemented yet? (Only Gnome-shell and Gtk theme finished!)
+  fi
+
+  if [[ "${scale}" == 'x2' ]]; then
+    prompt -s "Changing GDM scaling to 200% ... \n"
+    sed $SED_OPT "/\$scale/s/default/x2/"                                       "${THEME_SRC_DIR}/sass/_theme-options-temp.scss"
   fi
 }
 
