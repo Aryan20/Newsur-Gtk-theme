@@ -58,7 +58,7 @@ FIREFOX_FLATPAK_DIR_HOME="${MY_HOME}/.var/app/org.mozilla.firefox/.mozilla/firef
 FIREFOX_FLATPAK_THEME_DIR="${MY_HOME}/.var/app/org.mozilla.firefox/.mozilla/firefox/firefox-themes"
 FIREFOX_SNAP_DIR_HOME="${MY_HOME}/snap/firefox/common/.mozilla/firefox"
 FIREFOX_SNAP_THEME_DIR="${MY_HOME}/snap/firefox/common/.mozilla/firefox/firefox-themes"
-export WHITESUR_TMP_DIR="/tmp/WhiteSur.lock"
+export WHITESUR_TMP_DIR="/tmp/NewSur.lock"
 
 if [[ -w "/root" ]]; then
   THEME_DIR="/usr/share/themes"
@@ -67,7 +67,7 @@ else
 fi
 
 #--------------GDM----------------#
-WHITESUR_GS_DIR="/usr/share/gnome-shell/theme/WhiteSur"
+WHITESUR_GS_DIR="/usr/share/gnome-shell/theme/NewSur"
 COMMON_CSS_FILE="/usr/share/gnome-shell/theme/gnome-shell.css"
 UBUNTU_CSS_FILE="/usr/share/gnome-shell/theme/ubuntu.css"
 ZORIN_CSS_FILE="/usr/share/gnome-shell/theme/zorin.css"
@@ -80,7 +80,7 @@ MISC_GR_FILE="/usr/share/gnome-shell/gnome-shell-theme.gresource"
 GS_GR_XML_FILE="${THEME_SRC_DIR}/main/gnome-shell/gnome-shell-theme.gresource.xml"
 
 #-------------Theme---------------#
-THEME_NAME="WhiteSur"
+THEME_NAME="NewSur"
 COLOR_VARIANTS=('light' 'dark')
 OPACITY_VARIANTS=('normal' 'solid')
 ALT_VARIANTS=('normal' 'alt')
@@ -242,7 +242,7 @@ if [[ -d "${WHITESUR_TMP_DIR}" ]]; then
   start_animation; sleep 2; stop_animation; echo
 
   if [[ -d "${WHITESUR_TMP_DIR}" ]]; then
-    prompt -e "ERROR: Whitesur installer or tweaks is already running. Probably it's run by '$(ls -ld "${WHITESUR_TMP_DIR}" | awk '{print $3}')'"
+    prompt -e "ERROR: Newsur installer or tweaks is already running. Probably it's run by '$(ls -ld "${WHITESUR_TMP_DIR}" | awk '{print $3}')'"
     exit 1
   fi
 fi
