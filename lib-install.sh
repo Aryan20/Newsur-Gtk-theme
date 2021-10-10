@@ -10,7 +10,7 @@
 
 source "${REPO_DIR}/lib-core.sh"
 source "${REPO_DIR}/lib-flatpak.sh"
-WHITESUR_SOURCE+=("lib-install.sh")
+NEWSUR_SOURCE+=("lib-install.sh")
 
 ###############################################################################
 #                              DEPENDENCIES                                   #
@@ -295,24 +295,24 @@ install_beggy() {
 
   case "${background}" in
     blank)
-      cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-blank.png"          "${WHITESUR_TMP_DIR}/beggy.png" ;;
+      cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-blank.png"          "${NEWSUR_TMP_DIR}/beggy.png" ;;
     default)
       if [[ "${no_blur}" == "false" && "${no_darken}" == "true" ]]; then
-        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-blur.png"         "${WHITESUR_TMP_DIR}/beggy.png"
+        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-blur.png"         "${NEWSUR_TMP_DIR}/beggy.png"
       elif [[ "${no_blur}" == "false" && "${no_darken}" == "false" ]]; then
-        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-blur-darken.png"  "${WHITESUR_TMP_DIR}/beggy.png"
+        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-blur-darken.png"  "${NEWSUR_TMP_DIR}/beggy.png"
       elif [[ "${no_blur}" == "true" && "${no_darken}" == "true" ]]; then
-        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-default.png"      "${WHITESUR_TMP_DIR}/beggy.png"
+        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-default.png"      "${NEWSUR_TMP_DIR}/beggy.png"
       else
-        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-darken.png"       "${WHITESUR_TMP_DIR}/beggy.png"
+        cp -r "${THEME_SRC_DIR}/assets/gnome-shell/common-assets/background-darken.png"       "${NEWSUR_TMP_DIR}/beggy.png"
       fi
       ;;
     *)
       if [[ "${no_blur}" == "false" || "${darken}" == "true" ]]; then
         install_beggy_deps
-        convert "${background}" ${CONVERT_OPT}                                                "${WHITESUR_TMP_DIR}/beggy.png"
+        convert "${background}" ${CONVERT_OPT}                                                "${NEWSUR_TMP_DIR}/beggy.png"
       else
-        cp -r "${background}"                                                                 "${WHITESUR_TMP_DIR}/beggy.png"
+        cp -r "${background}"                                                                 "${NEWSUR_TMP_DIR}/beggy.png"
       fi
       ;;
   esac
@@ -322,8 +322,8 @@ install_darky() {
   local opacity="$(destify ${1})"
   local theme="$(destify ${2})"
 
-  sassc ${SASSC_OPT} "${THEME_SRC_DIR}/main/gtk-3.0/gtk-dark.scss"                            "${WHITESUR_TMP_DIR}/darky-3.css"
-  sassc ${SASSC_OPT} "${THEME_SRC_DIR}/main/gtk-4.0/gtk-dark.scss"                            "${WHITESUR_TMP_DIR}/darky-4.css"
+  sassc ${SASSC_OPT} "${THEME_SRC_DIR}/main/gtk-3.0/gtk-dark.scss"                            "${NEWSUR_TMP_DIR}/darky-3.css"
+  sassc ${SASSC_OPT} "${THEME_SRC_DIR}/main/gtk-4.0/gtk-dark.scss"                            "${NEWSUR_TMP_DIR}/darky-4.css"
 }
 
 install_xfwmy() {
@@ -380,7 +380,7 @@ install_shelly() {
   cp -r "${THEME_SRC_DIR}/assets/gnome-shell/assets${color}/"*".svg"                          "${TARGET_DIR}/assets"
   cp -r "${THEME_SRC_DIR}/assets/gnome-shell/activities/activities${icon}.svg"                "${TARGET_DIR}/assets/activities.svg"
   cp -r "${THEME_SRC_DIR}/assets/gnome-shell/activities/activities${icon}.svg"                "${TARGET_DIR}/assets/activities-white.svg"
-  cp -r "${WHITESUR_TMP_DIR}/beggy.png"                                                       "${TARGET_DIR}/assets/background.png"
+  cp -r "${NEWSUR_TMP_DIR}/beggy.png"                                                       "${TARGET_DIR}/assets/background.png"
 
   (
     cd "${TARGET_DIR}"
@@ -408,8 +408,8 @@ install_theemy() {
   fi
 
   local TARGET_DIR="${dest}/${name}${color}${opacity}${alt}${theme}"
-  local TMP_DIR_T="${WHITESUR_TMP_DIR}/gtk-3.0${color}${opacity}${alt}${theme}"
-  local TMP_DIR_F="${WHITESUR_TMP_DIR}/gtk-4.0${color}${opacity}${alt}${theme}"
+  local TMP_DIR_T="${NEWSUR_TMP_DIR}/gtk-3.0${color}${opacity}${alt}${theme}"
+  local TMP_DIR_F="${NEWSUR_TMP_DIR}/gtk-4.0${color}${opacity}${alt}${theme}"
 
   mkdir -p                                                                                    "${TARGET_DIR}"
 
@@ -423,7 +423,7 @@ install_theemy() {
   desktop_entry+="GtkTheme=${name}${color}${opacity}${alt}${theme}\n"
   desktop_entry+="MetacityTheme=${name}${color}${opacity}${alt}${theme}\n"
   desktop_entry+="IconTheme=${name}${iconcolor}\n"
-  desktop_entry+="CursorTheme=WhiteSur-cursors\n"
+  desktop_entry+="CursorTheme=NewSur-cursors\n"
   desktop_entry+="ButtonLayout=close,minimize,maximize:menu\n"
 
   echo -e "${desktop_entry}" >                                                                "${TARGET_DIR}/index.theme"
@@ -558,12 +558,12 @@ install_gdm_theme() {
 
   # Let's go!
   install_theme_deps
-  rm -rf "${WHITESUR_GS_DIR}"; install_beggy
+  rm -rf "${NEWSUR_GS_DIR}"; install_beggy
   gtk_base "${colors[0]}" "${opacities[0]}" "${themes[0]}"
 
   if check_theme_file "${COMMON_CSS_FILE}"; then # CSS-based theme
-    install_shelly "${colors[0]}" "${opacities[0]}" "${alts[0]}" "${themes[0]}" "${icon}" "${WHITESUR_GS_DIR}"
-    sed $SED_OPT "s|assets|${WHITESUR_GS_DIR}/assets|" "${WHITESUR_GS_DIR}/gnome-shell.css"
+    install_shelly "${colors[0]}" "${opacities[0]}" "${alts[0]}" "${themes[0]}" "${icon}" "${NEWSUR_GS_DIR}"
+    sed $SED_OPT "s|assets|${NEWSUR_GS_DIR}/assets|" "${NEWSUR_GS_DIR}/gnome-shell.css"
 
     if check_theme_file "${UBUNTU_CSS_FILE}"; then
       TARGET="${UBUNTU_CSS_FILE}"
@@ -572,14 +572,14 @@ install_gdm_theme() {
     fi
 
     backup_file "${COMMON_CSS_FILE}"; backup_file "${TARGET}"
-    ln -sf "${WHITESUR_GS_DIR}/gnome-shell.css" "${COMMON_CSS_FILE}"
-    ln -sf "${WHITESUR_GS_DIR}/gnome-shell.css" "${TARGET}"
+    ln -sf "${NEWSUR_GS_DIR}/gnome-shell.css" "${COMMON_CSS_FILE}"
+    ln -sf "${NEWSUR_GS_DIR}/gnome-shell.css" "${TARGET}"
 
-    # Fix previously installed WhiteSur
+    # Fix previously installed NewSur
     restore_file "${ETC_CSS_FILE}"
   else # GR-based theme
-    install_shelly "${colors[0]}" "${opacities[0]}" "${alts[0]}" "${themes[0]}" "${icon}" "${WHITESUR_TMP_DIR}/shelly"
-    sed $SED_OPT "s|assets|resource:///org/gnome/shell/theme/assets|" "${WHITESUR_TMP_DIR}/shelly/gnome-shell.css"
+    install_shelly "${colors[0]}" "${opacities[0]}" "${alts[0]}" "${themes[0]}" "${icon}" "${NEWSUR_TMP_DIR}/shelly"
+    sed $SED_OPT "s|assets|resource:///org/gnome/shell/theme/assets|" "${NEWSUR_TMP_DIR}/shelly/gnome-shell.css"
 
     if check_theme_file "$POP_OS_GR_FILE"; then
       TARGET="${POP_OS_GR_FILE}"
@@ -592,15 +592,15 @@ install_gdm_theme() {
     fi
 
     backup_file "${TARGET}"
-    glib-compile-resources --sourcedir="${WHITESUR_TMP_DIR}/shelly" --target="${TARGET}" "${GS_GR_XML_FILE}"
+    glib-compile-resources --sourcedir="${NEWSUR_TMP_DIR}/shelly" --target="${TARGET}" "${GS_GR_XML_FILE}"
 
-    # Fix previously installed WhiteSur
+    # Fix previously installed NewSur
     restore_file "${ETC_GR_FILE}"
   fi
 }
 
 revert_gdm_theme() {
-  rm -rf "${WHITESUR_GS_DIR}"
+  rm -rf "${NEWSUR_GS_DIR}"
   restore_file "${COMMON_CSS_FILE}"; restore_file "${UBUNTU_CSS_FILE}"
   restore_file "${ZORIN_CSS_FILE}"; restore_file "${ETC_CSS_FILE}"
   restore_file "${POP_OS_GR_FILE}"; restore_file "${YARU_GR_FILE}"
@@ -627,11 +627,11 @@ install_firefox_theme() {
 
   if [[ "${monterey}" == 'true' ]]; then
     udo cp -rf "${FIREFOX_SRC_DIR}"/Monterey                                                  "${TARGET_DIR}"
-    udo cp -rf "${FIREFOX_SRC_DIR}"/WhiteSur/{icons,titlebuttons}                             "${TARGET_DIR}"/Monterey
+    udo cp -rf "${FIREFOX_SRC_DIR}"/NewSur/{icons,titlebuttons}                             "${TARGET_DIR}"/Monterey
     udo cp -rf "${FIREFOX_SRC_DIR}"/userChrome-Monterey.css                                   "${TARGET_DIR}"/userChrome.css
   else
-    udo cp -rf "${FIREFOX_SRC_DIR}"/WhiteSur                                                  "${TARGET_DIR}"
-    udo cp -rf "${FIREFOX_SRC_DIR}"/userChrome-WhiteSur.css                                   "${TARGET_DIR}"/userChrome.css
+    udo cp -rf "${FIREFOX_SRC_DIR}"/NewSur                                                  "${TARGET_DIR}"
+    udo cp -rf "${FIREFOX_SRC_DIR}"/userChrome-NewSur.css                                   "${TARGET_DIR}"/userChrome.css
   fi
 
   config_firefox
@@ -766,18 +766,18 @@ disconnect_flatpak() {
 }
 
 connect_snap() {
-  sudo snap install whitesur-gtk-theme
+  sudo snap install newsur-gtk-theme
 
   for i in $(snap connections | grep gtk-common-themes | awk '{print $2}' | cut -f1 -d: | sort -u); do
-    sudo snap connect "${i}:gtk-3-themes"    "whitesur-gtk-theme:gtk-3-themes"
-    sudo snap connect "${i}:icon-themes"     "whitesur-gtk-theme:icon-themes"
+    sudo snap connect "${i}:gtk-3-themes"    "newsur-gtk-theme:gtk-3-themes"
+    sudo snap connect "${i}:icon-themes"     "newsur-gtk-theme:icon-themes"
   done
 }
 
 disconnect_snap() {
   for i in $(snap connections | grep gtk-common-themes | awk '{print $2}' | cut -f1 -d: | sort -u); do
-    sudo snap disconnect "${i}:gtk-3-themes" "whitesur-gtk-theme:gtk-3-themes"
-    sudo snap disconnect "${i}:icon-themes"  "whitesur-gtk-theme:icon-themes"
+    sudo snap disconnect "${i}:gtk-3-themes" "newsur-gtk-theme:gtk-3-themes"
+    sudo snap disconnect "${i}:icon-themes"  "newsur-gtk-theme:icon-themes"
   done
 }
 

@@ -8,11 +8,11 @@ set -Eeo pipefail
 
 if [[ ! "${REPO_DIR}" ]]; then
   echo "Please define 'REPODIR' variable"; exit 1
-elif [[ "${WHITESUR_SOURCE[@]}" =~ "lib-core.sh" ]]; then
+elif [[ "${NEWSUR_SOURCE[@]}" =~ "lib-core.sh" ]]; then
   echo "'lib-core.sh' is already imported"; exit 1
 fi
 
-WHITESUR_SOURCE=("lib-core.sh")
+NEWSUR_SOURCE=("lib-core.sh")
 
 ###############################################################################
 #                                VARIABLES                                    #
@@ -20,7 +20,7 @@ WHITESUR_SOURCE=("lib-core.sh")
 
 #--------------System--------------#
 
-export WHITESUR_PID=$$
+export NEWSUR_PID=$$
 MY_USERNAME="${SUDO_USER:-$(logname 2> /dev/null || echo "${USER}")}"
 MY_HOME=$(getent passwd "${MY_USERNAME}" | cut -d: -f6)
 
@@ -58,7 +58,7 @@ FIREFOX_FLATPAK_DIR_HOME="${MY_HOME}/.var/app/org.mozilla.firefox/.mozilla/firef
 FIREFOX_FLATPAK_THEME_DIR="${MY_HOME}/.var/app/org.mozilla.firefox/.mozilla/firefox/firefox-themes"
 FIREFOX_SNAP_DIR_HOME="${MY_HOME}/snap/firefox/common/.mozilla/firefox"
 FIREFOX_SNAP_THEME_DIR="${MY_HOME}/snap/firefox/common/.mozilla/firefox/firefox-themes"
-export WHITESUR_TMP_DIR="/tmp/NewSur.lock"
+export NEWSUR_TMP_DIR="/tmp/NewSur.lock"
 
 if [[ -w "/root" ]]; then
   THEME_DIR="/usr/share/themes"
@@ -67,7 +67,7 @@ else
 fi
 
 #--------------GDM----------------#
-WHITESUR_GS_DIR="/usr/share/gnome-shell/theme/NewSur"
+NEWSUR_GS_DIR="/usr/share/gnome-shell/theme/NewSur"
 COMMON_CSS_FILE="/usr/share/gnome-shell/theme/gnome-shell.css"
 UBUNTU_CSS_FILE="/usr/share/gnome-shell/theme/ubuntu.css"
 ZORIN_CSS_FILE="/usr/share/gnome-shell/theme/zorin.css"
@@ -135,7 +135,7 @@ notif_msg=""
 process_ids=()
 # This is important for 'udo' because 'return "${result}"' is considered the
 # last command in 'BASH_COMMAND' variable
-WHITESUR_COMMAND=""
+NEWSUR_COMMAND=""
 export ANIM_PID="0"
 has_any_error="false"
 swupd_packages=""
@@ -235,23 +235,23 @@ prompt() {
 ###############################################################################
 ##### This is the core of error handling, make sure there's no error here #####
 
-### TODO: return "lockWhiteSur()" back for non functional syntax error handling
+### TODO: return "lockNewSur()" back for non functional syntax error handling
 ###       and lock dir removal after immediate terminal window closing
 
-if [[ -d "${WHITESUR_TMP_DIR}" ]]; then
+if [[ -d "${NEWSUR_TMP_DIR}" ]]; then
   start_animation; sleep 2; stop_animation; echo
 
-  if [[ -d "${WHITESUR_TMP_DIR}" ]]; then
-    prompt -e "ERROR: Newsur installer or tweaks is already running. Probably it's run by '$(ls -ld "${WHITESUR_TMP_DIR}" | awk '{print $3}')'"
+  if [[ -d "${NEWSUR_TMP_DIR}" ]]; then
+    prompt -e "ERROR: Newsur installer or tweaks is already running. Probably it's run by '$(ls -ld "${NEWSUR_TMP_DIR}" | awk '{print $3}')'"
     exit 1
   fi
 fi
 
-rm -rf "${WHITESUR_TMP_DIR}"
-mkdir -p "${WHITESUR_TMP_DIR}"; exec 2> "${WHITESUR_TMP_DIR}/error_log.txt"
+rm -rf "${NEWSUR_TMP_DIR}"
+mkdir -p "${NEWSUR_TMP_DIR}"; exec 2> "${NEWSUR_TMP_DIR}/error_log.txt"
 
 signal_exit() {
-  rm -rf "${WHITESUR_TMP_DIR}"
+  rm -rf "${NEWSUR_TMP_DIR}"
   stop_animation
 }
 
@@ -265,11 +265,11 @@ signal_error() {
   # TODO: make this more accurate
 
   IFS=$'\n'
-  local sources=($(basename -a "${WHITESUR_SOURCE[@]}" "${BASH_SOURCE[@]}" | sort -u))
+  local sources=($(basename -a "${NEWSUR_SOURCE[@]}" "${BASH_SOURCE[@]}" | sort -u))
   local dist_ids=($(awk -F '=' '/ID/{print $2}' "/etc/os-release" | tr -d '"' | sort -Vru))
   local repo_ver=""
   local lines=()
-  local log="$(awk '{printf "\033[1;31m  >>> %s\n", $0}' "${WHITESUR_TMP_DIR}/error_log.txt" || echo "")"
+  local log="$(awk '{printf "\033[1;31m  >>> %s\n", $0}' "${NEWSUR_TMP_DIR}/error_log.txt" || echo "")"
 
   if ! repo_ver="$(cd "${REPO_DIR}"; git log -1 --date=format-local:"%FT%T%z" --format="%ad")"; then
     if ! repo_ver="$(date -r "${REPO_DIR}" +"%FT%T%z")"; then
@@ -294,11 +294,11 @@ signal_error() {
   prompt -e "FOUND  :"
 
   for i in "${sources[@]}"; do
-    lines=($(grep -Fn "${WHITESUR_COMMAND:-${BASH_COMMAND}}" "${REPO_DIR}/${i}" | cut -d : -f 1 || echo ""))
+    lines=($(grep -Fn "${NEWSUR_COMMAND:-${BASH_COMMAND}}" "${REPO_DIR}/${i}" | cut -d : -f 1 || echo ""))
     prompt -e "  >>> ${i}$(IFS=';'; [[ "${lines[*]}" ]] && echo " at ${lines[*]}")"
   done
 
-  prompt -e "SNIPPET:\n    >>> ${WHITESUR_COMMAND:-${BASH_COMMAND}}"
+  prompt -e "SNIPPET:\n    >>> ${NEWSUR_COMMAND:-${BASH_COMMAND}}"
   prompt -e "TRACE  :"
 
   for i in "${FUNCNAME[@]}"; do
@@ -316,9 +316,9 @@ signal_error() {
   fi
 
   prompt -i "HINT: You can google or report to us the info above\n"
-  prompt -i "https://github.com/vinceliuice/WhiteSur-gtk-theme/issues\n\n"
+  prompt -i "https://github.com/vinceliuice/NewSur-gtk-theme/issues\n\n"
 
-  rm -rf "${WHITESUR_TMP_DIR}"; exit 1
+  rm -rf "${NEWSUR_TMP_DIR}"; exit 1
 }
 
 trap 'signal_exit' EXIT
@@ -675,7 +675,7 @@ sudo() {
     ${SUDO_BIN} "${@}" || result="${?}"
   fi
 
-  [[ "${result}" != "0" ]] && WHITESUR_COMMAND="${*}"
+  [[ "${result}" != "0" ]] && NEWSUR_COMMAND="${*}"
 
   return "${result}"
 }
@@ -695,7 +695,7 @@ udo() {
     ${SUDO_BIN} -u "${MY_USERNAME}" "${@}" || result="${?}"
   fi
 
-  [[ "${result}" != "0" ]] && WHITESUR_COMMAND="${*}"
+  [[ "${result}" != "0" ]] && NEWSUR_COMMAND="${*}"
 
   return "${result}"
 }
