@@ -15,6 +15,8 @@ This theme is maintained by the following person(s) and a bunch of [awesome cont
 --- |
 [Aryan Kaushik](https://github.com/Aryan20) |
 
+Note - Most of the code is contributed by different developers on the upstream original project, I commit those to keep mine updated but all the effort belongs to the original contributors.
+
 ## License
 
 [MIT License](./LICENSE)

@@ -166,8 +166,8 @@ Usage:  `./tweaks.sh [OPTIONS...]`
 <details> <summary> Options </summary>
 
 ```bash
--f, --firefox [default|monterey]
-Install 'NewSur|Monterey' theme for Firefox and connect it to the current Firefox profiles. Default is NewSur
+-f, --firefox [default|monterey|alt]
+Install 'NewSur|Monterey|Monterey-Alt' theme for Firefox and connect it to the current Firefox profiles. Default is NewSur
 
 -e, --edit-firefox
 Edit 'NewSur' theme for Firefox settings and also connect the theme to the current Firefox profiles.
