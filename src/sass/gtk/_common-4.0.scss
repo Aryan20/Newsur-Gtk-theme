@@ -46,6 +46,8 @@ $list_shadow: if($variant == 'light',
 }
 
 %circular_row {
+  border: none;
+
   &:first-child {
     border-top-left-radius: $wm_radius;
     border-top-right-radius: $wm_radius;
@@ -1283,6 +1285,11 @@ combobox {
     }
   }
 
+  .background & button.combo:disabled arrow,
+  .background & button.combo:backdrop arrow {
+    background-color: if($variant=='light', rgba(black, 0.35), rgba(white, 0.25));
+  }
+
   button.combo:checked,
   .background & button.combo:checked { transition: none; } // workaround for menuitem selection
 
@@ -1574,17 +1581,19 @@ actionbar > revealer > box {
 }
 
 headerbar {
-  min-height: $headerbar_size;
+  min-height: $headerbar_size + 4px;
   padding: 0 $container_padding + 10px;
   color: $header_fg;
   background-color: $header_bg;
   border-bottom: 1px solid $header_border;
+  box-shadow: none;
 
   &:backdrop {
     transition: $backdrop_transition;
     color: transparentize($header_fg, 0.3);
     background-color: $header_bg_backdrop;
     border-color: if($variant=='light', lighten($header_border, 5%), darken($header_border, 3%));
+    box-shadow: none;
   }
 
   .title {
@@ -1609,7 +1618,10 @@ headerbar {
     margin-bottom: 8px;
   }
 
-  // button.toggle.popup { margin-right: 3px; } // Nautilus 3.30 popup button
+  menubutton.popup {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 
   // Reset linked buttons
   .linked.raised > & {
@@ -1630,7 +1642,7 @@ headerbar {
   // Reset linking entrys
   .linked:not(.vertical) > entry {
     @include entry(header-normal);
-    margin: 8px ($container_padding/2 + 1px);
+    margin: 8px ($container_padding / 2 + 1px);
     padding: 0 $container_padding * 2;
     border-radius: $bt_radius;
     border: none;
@@ -1690,25 +1702,30 @@ headerbar {
     box-shadow: none;
   }
 
-  &.windowhandle {
-    viewswitcher button:not(.titlebutton):not(.suggested-action):not(.destructive-action) {
-      border-radius: 0;
-      margin-top: 0;
-      margin-bottom: 0;
+  windowhandle {
+    viewswitcher {
+      button {
+        margin-top: 2px;
+        margin-bottom: 1px;
+        min-height: 0;
+
+        > stack > box {
+          &.wide {
+            padding: 0 12px;
+            border-spacing: 0;
+          }
+        }
+      }
     }
 
-    > button.popup {
-      &:hover {
-        @include button(header-hover);
-      }
+    box.linked > button {
+      background-color: $fill_color;
 
-      &:active {
-        @include button(header-active);
-      }
+      &:hover { background-color: $divider_color; }
 
-      &:checked {
-        @include button(header-checked);
-      }
+      &:active { background-color: $track_color; }
+
+      &:checked { background-color: $visit_color; }
     }
   }
 
@@ -1793,126 +1810,13 @@ headerbar {
     }
   }
 
-  &.default-decoration,
-  .csd &.default-decoration,             // needed under wayland, since all gtk3 windows are csd windows
-  &.default-decoration:backdrop,
-  .csd &.default-decoration:backdrop {
-    // box-shadow: none;
-    border: none;
-  }
-
   separator.titlebutton { @extend %header_separator; }
-
-  // Fixes split headerbars
-  separator:first-child + &,
-  &:first-child {
-    &, &:backdrop {
-      border-top-left-radius: $wm_radius;
-
-      .maximized &,
-      .tiled & { border-top-left-radius: $maximized_radius; }
-    }
-  }
-
-  &:last-child {
-    &, &:backdrop {
-      border-top-right-radius: $wm_radius;
-
-      .maximized &,
-      .tiled & { border-top-right-radius: $maximized_radius; }
-    }
-  }
-
-  stack & { // tackles the stacked headerbars case
-    &:first-child, &:last-child {
-      border-top-left-radius: $wm_radius;
-      border-top-right-radius: $wm_radius;
-    }
-  }
-
-  window separator:first-child + &,
-  window &:first-child { &:backdrop, & { border-top-left-radius: $wm_radius; }}
-  window &:last-child { &:backdrop, & { border-top-right-radius: $wm_radius; }}
-
-  window stack & { // tackles the stacked headerbars case
-    &:first-child, &:last-child {
-      &:backdrop, & {
-        border-top-left-radius: $wm_radius;
-        border-top-right-radius: $wm_radius;
-      }
-    }
-  }
-
-  window.tiled &,
-  window.tiled-top &,
-  window.tiled-right &,
-  window.tiled-bottom &,
-  window.tiled-left &,
-  window.maximized & {
-    &,
-    &:first-child,
-    &:last-child,
-    &:only-child {
-      border-top-left-radius: $maximized_radius;
-      border-top-right-radius: $maximized_radius;
-    }
-  }
-
-  window.fullscreen &,
-  .solid-csd & {
-    &,
-    &:first-child,
-    &:last-child,
-    &:only-child {
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
-    }
-  }
 }
 
 .titlebar {
-  &, &.background {
-    border-top-left-radius: $wm_radius;
-    border-top-right-radius: $wm_radius;
-  }
-
-  &, & headerbar {
-    box-shadow: inset 0 1px $highlight_color;
-
-    .tiled &,
-    .maximized &,
-    .fullscreen & {
-      box-shadow: none;
-
-      &, &.background {
-        border-top-left-radius: $maximized_radius;
-        border-top-right-radius: $maximized_radius;
-      }
-    }
-  }
-
   > box.left.horizontal,
   > box.right.horizontal {
     padding: 0 $container_padding;
-  }
-}
-
-window.background > box.vertical > headerbar:not(.titlebar) { // reset headerbar style for not CSD window
-  border-radius: 0 0 0 0;
-  box-shadow: none;
-
-  // Fixes split headerbars
-  separator:first-child + &,
-  &:first-child {
-    &, &:backdrop {
-      border-top-left-radius: 0;
-    }
-  }
-
-  &:last-child {
-    &, &:backdrop {
-      border-top-right-radius: 0;
-    }
   }
 }
 
@@ -2196,6 +2100,7 @@ popover.background {
   > arrow,
   > contents {
     padding: 0;
+    color: $fg_color;
     background-clip: border-box;
     background-color: $menu_bg;
     box-shadow: 0 3px 6px 0 if($variant=='light', transparentize(black, 0.85), transparentize(black, 0.85)),
@@ -2329,6 +2234,7 @@ popover.menu {
   &.background > contents {
     background-color: $menu_bg;
     padding: $container_padding;
+    color: $fg_color;
   }
 
   &.background separator {
@@ -2362,6 +2268,7 @@ popover.menu {
     padding: $container_padding / 3 $container_padding;
     border-radius: $mn_radius - $container_padding / 2;
     transition: none;
+    color: $text_color;
 
     &:focus {
       background-color: transparent;
@@ -2404,6 +2311,8 @@ popover.menu {
   background-color: transparentize($base_color, 1);
   border: 1px solid transparent;
   transition: all 150ms ease-out;
+  border-radius: 0;
+  padding: $container_padding - 4px $container_padding + 4px;
 
   &:hover:not(:checked) {
     color: mix($fg_color, $disabled_fg_color, 50%);
@@ -2418,13 +2327,29 @@ popover.menu {
   }
 }
 
+%monterey_tab {
+  color: $disabled_fg_color;
+  background-color: transparentize($base_color, 1);
+  border: none;
+  transition: all 150ms ease-out;
+  border-radius: $bt_radius;
+  padding: $container_padding - 4px $container_padding + 4px;
+
+  &:hover:not(:checked) {
+    color: mix($fg_color, $disabled_fg_color, 50%);
+    background-color: rgba($fg_color, 0.06);
+  }
+
+  &:checked {
+    color: $fg_color;
+    background-color: rgba($fg_color, 0.12);
+  }
+}
+
 notebook {
   padding: 0;
-  // margin-top: -1px;
 
-  &.frame {
-    border: 1px solid $solid_borders_color;
-  }
+  &.frame { border: 1px solid $solid_borders_color; }
 
   > stack:not(:only-child) { // the :not(:only-child) is for "hidden" notebooks
     background-color: $base_color;
@@ -2435,62 +2360,56 @@ notebook {
   }
 
   > header {
-    padding: 0;
-    background-color: darken($header_bg, 10%);
+    @if $monterey == 'false' {
+      background-color: darken($header_bg, 10%);
 
-    // Set box-shadow to make the header frame color more easy to see
-    // Set margin to hide the ugly borders around the header
-    &.top {
-      box-shadow: inset 0 1px $solid_borders_color, inset 0 -1px $borders_color;
-      @if $variant=='light' {
-          box-shadow: inset 0 1px $borders_color,
-                      inset 0 -1px $borders_color,
-                            1px 0 $borders_color,
-                            -1px 0 $borders_color;
+      // Set box-shadow to make the header frame color more easy to see
+      // Set margin to hide the ugly borders around the header
+      &.top {
+        box-shadow: inset 0 1px $borders_color, inset 0 -1px $borders_color;
       }
-      margin-top: -1px;
-    }
 
-    &.bottom {
-      box-shadow: inset 0 1px $borders_color, inset 0 -1px $solid_borders_color;
-      @if $variant=='light' {
-          box-shadow: inset 0 1px $borders_color,
-                      inset 0 -1px $borders_color,
-                      1px 0 $borders_color,
-                      -1px 0 $borders_color;
+      &.bottom {
+        box-shadow: inset 0 1px $borders_color, inset 0 -1px $borders_color;
       }
-      margin-bottom: -1px;
-    }
 
-    &.right {
-      box-shadow: inset 1px 0 $borders_color, inset -1px 0 $solid_borders_color;
-      @if $variant=='light' {
-          box-shadow: inset 1px 0 $borders_color,
-                      inset -1px 0 $borders_color,
-                      0 1px $borders_color,
-                      0 -1px $borders_color;
+      &.right {
+        box-shadow: inset 1px 0 $borders_color, inset -1px 0 $borders_color;
       }
-      margin-right: -1px;
-    }
 
-    &.left {
-      box-shadow: inset 1px 0 $solid_borders_color, inset -1px 0 $borders_color;
-      @if $variant=='light' {
-          box-shadow: inset 1px 0 $borders_color,
-                      inset -1px 0 $borders_color,
-                      0 1px $borders_color,
-                      0 -1px $borders_color;
+      &.left {
+        box-shadow: inset 1px 0 $borders_color, inset -1px 0 $borders_color;
       }
-      margin-left: -1px;
+    } @else {
+      &.top {
+        border-bottom: 1px solid $borders_color;
+      }
+
+      &.bottom {
+        border-top: 1px solid $borders_color;
+      }
+
+      &.right {
+        border-left: 1px solid $borders_color;
+      }
+
+      &.left {
+        border-right: 1px solid $borders_color;
+      }
     }
 
     button.flat.toggle.popup {
-      min-width: $menuitem_size;
-      border-radius: 0;
-      padding: 0;
+      min-width: $medium_size;
       border: none;
       box-shadow: none;
-      margin: 0;
+      border-radius: $bt_radius;
+      padding: 0 $container_padding / 2;
+
+      @if $monterey == 'true' {
+        margin-top: -2px;
+        margin-bottom: -2px;
+        margin-left: $container_padding / 2;
+      }
 
       &:active, &:checked {
         color: $fg_color;
@@ -2501,20 +2420,29 @@ notebook {
     @each $_pos, $_bpos in (top, bottom), (bottom, top), (right, left), (left, right) {
       // sizing and borders
       &.#{$_pos} {
-        padding: 0;
+        @if $monterey == 'false' {
+          margin-#{$_pos}: -1px;
+          padding: 0;
+        } @else {
+          padding: $container_padding / 2;
+        }
 
-        tab {
-          padding: $container_padding - 4px $container_padding + 4px;
+        > tabs > tab {
+          outline-offset: -4px;
           min-width: 24px;
           min-height: 24px;
-          border-radius: 0;
-          outline-offset: -4px;
-          // border-#{$_pos}: none;
 
-          // tab overlap
-          + tab {
-            @if $_pos==top or $_pos==bottom { margin-left: -1px; }
-            @else { margin-top: -1px; }
+          @if $monterey == 'false' {
+            // tab overlap
+            + tab {
+              @if $_pos==top or $_pos==bottom { margin-left: -1px; }
+              @else { margin-top: -1px; }
+            }
+          } @else {
+            + tab {
+              @if $_pos==top or $_pos==bottom { margin-left: $container_padding / 2; }
+              @else { margin-top: $container_padding / 2; }
+            }
           }
         }
       }
@@ -2553,34 +2481,54 @@ notebook {
       &:disabled { color: transparentize($disabled_fg_color,0.3); }
     }
 
-    &.top,
-    &.bottom {
-      tabs > tab {
-        &:first-child { border-left-style: none; }
-        &:last-child { border-right-style: none; }
+    @if $monterey == 'false' {
+      &.top,
+      &.bottom {
+        > tabs > tab {
+          &:first-child { border-left: none; }
+          &:last-child { border-right: none; }
+        }
       }
-    }
 
-    &.left,
-    &.right {
-      tabs > tab {
-        &:first-child { border-top-style: none; }
-        &:last-child { border-bottom-style: none; }
+      &.left,
+      &.right {
+        > tabs > tab {
+          &:first-child { border-top: none; }
+          &:last-child { border-bottom: none; }
+        }
       }
     }
 
     > tabs > tab {
-      @extend %tabs_tab;
+      @if $monterey == 'false' {
+        @extend %tabs_tab;
+      } @else {
+        @extend %monterey_tab;
+      }
 
       // close button
-      button.flat {
-        min-height: $small_size;
-        min-width: $small_size;
+      button.flat,
+      button.close-button,
+      button.image-button.flat {
         border-radius: 3px;
         padding: 0;
-        margin-top: 2px;
-        margin-bottom: 2px;
         color: mix($bg_color, $fg_color, 35%);
+        margin-left: $container_padding / 2;
+        margin-right: -$container_padding;
+
+        @if $monterey == 'false' {
+          min-height: $small_size;
+          min-width: $small_size;
+          margin-top: 2px;
+          margin-bottom: 2px;
+        } @else {
+          min-height: 16px;
+          min-width: 16px;
+          margin-top: 4px;
+          margin-bottom: 4px;
+          margin-left: $container_padding / 2;
+          margin-right: -$container_padding / 2;
+        }
 
         &:hover {
           @extend %undecorated_button;
@@ -2593,6 +2541,62 @@ notebook {
           color: if($variant == 'light', darken($fg_color, 10%), lighten($fg_color, 10%));
           background-color: rgba($borders_color, 0.2);
         }
+      }
+    }
+  }
+}
+
+tabbox {
+  @if $monterey == 'false' {
+    background-color: darken($header_bg, 10%);
+    box-shadow: inset 0 -1px $borders_color;
+  } @else {
+    background-color: $header_bg;
+    border-bottom: 1px solid $borders_color;
+    padding: 0 $container_padding / 2 $container_padding / 2;
+  }
+
+  > tab {
+    @if $monterey == 'false' {
+      @extend %tabs_tab;
+      border-top: none;
+      border-top: 1px solid $borders_color;
+      &:checked { border-top-color: $header_bg; }
+    } @else {
+      @extend %monterey_tab;
+
+      + tab {
+        margin-left: $container_padding / 2;
+      }
+    }
+
+    button.tab-close-button {
+      border-radius: 3px;
+      border: none;
+      padding: 0;
+      @extend %flat_button;
+
+      @if $monterey == 'false' {
+        min-height: $small_size;
+        min-width: $small_size;
+        margin-top: 2px;
+        margin-bottom: 2px;
+      } @else {
+        min-height: 16px;
+        min-width: 16px;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        margin-right: -$container_padding;
+      }
+
+      &:hover {
+        color: $fg_color;
+        background-color: rgba($borders_color, 0.1);
+      }
+
+      &:active, &:active:hover {
+        color: if($variant == 'light', darken($fg_color, 10%), lighten($fg_color, 10%));
+        background-color: rgba($borders_color, 0.2);
       }
     }
   }
@@ -3404,17 +3408,13 @@ separator {
 //
 // Lists
 //
-listview,
 list {
   background-color: $base_color;
   border-color: $borders_color;
-  // border-radius: $wm_radius;
+  color: $fg_color;
 
   > row {
     padding: 2px;
-
-    // &:first-child { border-radius: $bt_radius $bt_radius 0 0; }
-    // &:last-child { border-radius: 0 0 $bt_radius $bt_radius; }
   }
 
   &.content:not(.conversation-listbox) {
@@ -3425,8 +3425,35 @@ list {
     }
   }
 
+  &.boxed-list {
+    @extend %circular_list;
+
+    > row {
+      @extend %circular_row;
+
+      &.expander {
+        list {
+          background-color: transparent;
+          box-shadow: none;
+          border: none;
+
+          > row {
+            @extend %circular_row;
+          }
+        }
+      }
+    }
+  }
+
   > row.expander { padding: 0px; }
   > row.expander .row-header { padding: 2px; }
+}
+
+listview.view {
+  color: $fg_color;
+  background-color: transparent;
+
+  popover.menu & { padding: $container_padding / 2; }
 }
 
 %row_activatable {
@@ -4335,6 +4362,10 @@ stackswitcher {
 
 window {
   border-width: 0;
+  outline-color: $highlight_color;
+  outline-offset: -1px;
+  outline-style: solid;
+  outline-width: 1px;
 
   &.csd {
     transition: $shadow_transition;
@@ -4374,12 +4405,8 @@ window {
 
   &.maximized,
   &.fullscreen,
-  &.tiled,
-  &.tiled-top,
-  &.tiled-left,
-  &.tiled-right,
-  &.tiled-bottom {
-    border-radius: 0;
+  &:backdrop {
+    outline-width: 0;
   }
 
   &.popup { box-shadow: none; }

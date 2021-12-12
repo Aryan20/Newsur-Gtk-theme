@@ -181,7 +181,7 @@ $list_shadow: if($variant == 'light',
   }
 
   &:disabled {
-    &, label { color: transparentize($selected_fg_color, 0.5); }
+    color: transparentize($selected_fg_color, 0.5);
     background-color: transparentize($selected_fg_color, 1);
     border-color: transparentize($selected_fg_color, 0.6);
     box-shadow: none;
@@ -1208,6 +1208,11 @@ combobox {
     }
   }
 
+  .background & button.combo:disabled arrow,
+  .background & button.combo:backdrop arrow {
+    background-color: if($variant=='light', rgba(black, 0.35), rgba(white, 0.25));
+  }
+
   decoration,
   button.combo:checked,
   .background & button.combo:checked { transition: none; } // workaround for menuitem selection
@@ -1718,7 +1723,7 @@ headerbar {
       border-color: darken($selection_mode_bg, 4%);
     }
 
-    button:not(.flat):not(.suggested-action):not(.destructive-action):not(.titlebutton) {
+    button:not(.flat):not(.suggested-action):not(.destructive-action):not(.titlebutton):not(.combo) {
       @include button(undecorated);
       @extend %selected-button;
     }
@@ -1775,12 +1780,15 @@ headerbar {
     }
   }
 
-  &.default-decoration,
-  .csd &.default-decoration,             // needed under wayland, since all gtk3 windows are csd windows
-  &.default-decoration:backdrop,
-  .csd &.default-decoration:backdrop {
+  &.default-decoration,             // needed under wayland, since all gtk3 windows are csd windows
+  &.default-decoration:backdrop {
     // box-shadow: none;
     border: none;
+  }
+
+  .csd &.default-decoration,
+  .csd &.default-decoration:backdrop {
+    border-bottom: 1px solid $header_border;
   }
 
   separator.titlebutton { @extend %header_separator; }
@@ -2205,7 +2213,7 @@ menu,
     border-radius: $mn_radius - 3px;
     text-shadow: none;
     color: $fg_color;
-    -gtk-icon-style: symbolic;
+    // -gtk-icon-style: symbolic;
 
     &:hover {
       transition: none;
@@ -2224,7 +2232,7 @@ menu,
           -gtk-icon-shadow: none;
         }
 
-        menuitem { -gtk-icon-style: symbolic; }
+        // menuitem { -gtk-icon-style: symbolic; }
 
         menuitem:hover {
           arrow { color: $selected_fg_color; }
@@ -2409,7 +2417,7 @@ cursor-handle {
   border: none;
   transition: all 150ms ease-out;
   border-radius: $bt_radius;
-  padding: 0 $container_padding + 4px;
+  padding: $container_padding - 4px $container_padding + 4px;
 
   &:hover:not(:checked) {
     color: mix($fg_color, $disabled_fg_color, 50%);
@@ -2443,42 +2451,18 @@ notebook {
       // Set margin to hide the ugly borders around the header
       &.top {
         box-shadow: inset 0 1px $borders_color, inset 0 -1px $borders_color;
-        // @if $variant=='light' {
-        //     box-shadow: inset 0 1px $borders_color,
-        //                 inset 0 -1px $borders_color,
-        //                       1px 0 $borders_color,
-        //                       -1px 0 $borders_color;
-        // }
       }
 
       &.bottom {
         box-shadow: inset 0 1px $borders_color, inset 0 -1px $borders_color;
-        // @if $variant=='light' {
-        //     box-shadow: inset 0 1px $borders_color,
-        //                 inset 0 -1px $borders_color,
-        //                 1px 0 $borders_color,
-        //                 -1px 0 $borders_color;
-        // }
       }
 
       &.right {
         box-shadow: inset 1px 0 $borders_color, inset -1px 0 $borders_color;
-        // @if $variant=='light' {
-        //     box-shadow: inset 1px 0 $borders_color,
-        //                 inset -1px 0 $borders_color,
-        //                 0 1px $borders_color,
-        //                 0 -1px $borders_color;
-        // }
       }
 
       &.left {
         box-shadow: inset 1px 0 $borders_color, inset -1px 0 $borders_color;
-        // @if $variant=='light' {
-        //     box-shadow: inset 1px 0 $borders_color,
-        //                 inset -1px 0 $borders_color,
-        //                 0 1px $borders_color,
-        //                 0 -1px $borders_color;
-        // }
       }
     } @else {
       &.top {
@@ -2499,12 +2483,17 @@ notebook {
     }
 
     button.flat.toggle.popup {
-      min-width: $menuitem_size;
+      min-width: $medium_size;
       border: none;
       box-shadow: none;
-      padding: 0;
-      margin-left: $container_padding / 2;
       border-radius: $bt_radius;
+      padding: 0 $container_padding / 2;
+
+      @if $monterey == 'true' {
+        margin-top: -2px;
+        margin-bottom: -2px;
+        margin-left: $container_padding / 2;
+      }
 
       &:active, &:checked {
         color: $fg_color;
@@ -2621,6 +2610,8 @@ notebook {
           min-width: 16px;
           margin-top: 4px;
           margin-bottom: 4px;
+          margin-left: $container_padding / 2;
+          margin-right: -$container_padding / 2;
         }
 
         &:hover {
@@ -3513,9 +3504,10 @@ expander {
 calendar {
   color: $fg_color;
   border: 1px solid $borders_color;
-  border-radius: $bt_radius;
   padding: 2px $container_padding;
   margin: 0;
+
+  .csd & { border-radius: $bt_radius; }
 
   &:selected {
     @extend %selected_items;
@@ -3573,12 +3565,16 @@ messagedialog { // Message Dialog styling
         border-radius: $bt_radius;
         background-color: transparent;
 
-        &:hover {
+        &:hover, &:focus:hover {
           @include button(flat-hover);
           transition: $button_transition;
         }
 
-        &:active, &:checked {
+        &:focus {
+          background-color: $fill_color;
+        }
+
+        &:active, &:active:hover {
           @include button(active);
         }
       }
@@ -4236,6 +4232,11 @@ decoration {
 
     &, &.backdrop { box-shadow: $wm_outline; }
     &.maximized, &.tiled { border-radius: 0; }
+  }
+
+  .metacity & {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   .csd.popup & {
